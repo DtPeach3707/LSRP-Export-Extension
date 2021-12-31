@@ -1,0 +1,39 @@
+{
+    "manifest_version": 3,
+    "name": "LSRP Export Fix",
+    "description": "Extracting item price and customer ID for exporting to csv for customer and item reports for Light Speed Retail Pos",
+    "version": "0.0.0",
+
+    "permissions":
+    [
+        "tabs",
+        "scripting",
+        "storage"
+    ],
+
+    "host_permissions":
+    [
+        "http://*/",
+        "https://*/"
+    ],
+    
+    "content_scripts": 
+    [
+        {
+            "js": ["content.js"],
+            "all_frames": true,
+            "matches": ["*://us.merchantos.com/*"]
+        }
+    ],
+
+    "background":
+    {
+        "service_worker": "background.js"
+    },
+
+    "action":
+    {
+        "default_popup": "popup/popup.html"
+    }
+
+}
