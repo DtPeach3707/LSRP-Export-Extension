@@ -39,7 +39,7 @@ chrome.storage.sync.get(['isOff'], function(toggl)
         }
         else
         {
-            chrome.storage.local.set({totalCSV: csvContent});
+            chrome.storage.local.set({totalCSV: null});
         }
     }
 });
