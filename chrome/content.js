@@ -14,14 +14,61 @@ function Export()
     chrome.runtime.sendMessage({msg: info});
 }
 
-chrome.storage.sync.get(['isOn'], function(toggl)
+chrome.storage.sync.get(['isOff'], function(toggl)
 {
-	if(toggl.isOff){}
+    if(toggl.isOff){}
     else
     {
-        if(document.getElementsByClassName('container'))
+        if(document.getElementById('nextPage_top'))
         {
-            Export();
+            var exported = true;
+            var info = Export();
+            if(document.getElementById('nextPage_top').classList[1] == null)
+            {
+                var isDone = false;
+            }
+            else
+            {
+                var isDone = true;
+            }
+            if(exported )
+            {
+                chrome.runtime.sendMessage({msg: [info, isDone]});
+                exported = false;
+            }
         }
+        else
+        {
+            chrome.storage.local.set({totalCSV: csvContent});
+        }
+    }
+});
+
+
+//Keep going until done using message listeners
+chrome.runtime.onMessage.addListener((msg)=>{
+    if(msg.msg == false)
+    {   
+        var exported = true;
+        document.getElementById('nextPage_top').click();
+        setTimeout(()=>{console.log('Page loaded')}, 2000);
+        var info = Export();
+        if(document.getElementById('nextPage_top').classList[1] == null)
+        {
+            var isDone = false;
+        }
+        else
+        {
+            var isDone = true;
+        }
+        if(exported)
+        {
+            chrome.runtime.sendMessage({msg: [info, isDone]});
+            exported = false;
+        }
+    }
+    else
+    {
+        console.log('Be done yes');
     }
 });
