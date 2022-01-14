@@ -26,7 +26,16 @@ function toggle() // For turning the extension on and off
         });
 }
 
+
+function resetCSV() // Reset CSV collection
+{
+	chrome.storage.local.set({totalCSV: null});
+}
+
+
 document.getElementById('toggle').addEventListener('click', toggle);
+document.getElementById('reset').addEventListener('click', resetCSV);
+
 
 chrome.storage.sync.get(['isOff'], function(toggl)
 {
