@@ -10,8 +10,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)
 async function makeCSV(priceList)
 {
     var csv_lis = [];
-    csv_lis.push(['Customer Name', 'Customer ID', 'Description', 'Item Price', 'Quantity', 'Total'])
-    for (arr of priceList)
+    for (arr of priceList[0])
     {
         CiD = arr[1];
         IpUrl = arr[3];
@@ -24,16 +23,35 @@ async function makeCSV(priceList)
         csv_lis.push([arr[0], CI, arr[2], ItemP, arr[4], arr[5]]);
     }
 
-    let csvContent = "data:text/csv;charset=utf-8,";
-
+    var csvContent = '';
+    
     csv_lis.forEach(function(rowArray) {
         let row = rowArray.join("\t");
         csvContent += row + "\n";
     });
 
-    chrome.tabs.query({currentWindow: true, active: true}, function (tabs){
-        console.log(tabs);
-        chrome.scripting.executeScript({target: {tabId: tabs[0].id, allFrames: true}, func: addCSVLink, args: [csvContent]});
+    chrome.storage.local.get(['totalCSV'], (totCSV)=>{
+        if(totCSV.totalCSV)
+        {
+            var newCSV = totCSV.totalCSV + csvContent;
+        }
+        else
+        {
+            var newCSV = csvContent;
+        }
+        console.log(newCSV);
+        let csvcontent = "data:text/csv;charset=utf-8,"; // Initializes in here so background doesn't screw up
+        var csvArray = ['Customer Name', 'Customer ID', 'Description', 'Item Price', 'Quantity', 'Total'];
+        let row = csvArray.join("\t");
+        csvcontent += row + "\n";
+        console.log(csvcontent + newCSV);
+        var encodedUri = encodeURI(csvcontent + newCSV);
+        chrome.storage.local.set({totalCSV: newCSV});
+        console.log('About to tell content script to do stuff again');
+        chrome.tabs.query({currentWindow: true, active: true}, function (tabs){
+            chrome.scripting.executeScript({target: {tabId: tabs[0].id, allFrames: true}, func: addCSVLink, args: [encodedUri]});
+            chrome.tabs.sendMessage(tabs[0].id, {msg: priceList[1]});
+        });
     });
 }
 
